@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Sample crypto symbols to track
+// Śledzone symbole kryptowalut
 const CRYPTO_SYMBOLS = [
   'BTCUSDT',
   'ETHUSDT',
@@ -14,14 +14,14 @@ const CRYPTO_SYMBOLS = [
   'LINKUSDT',
 ];
 
-// Map for conversion rates (simplified for demo)
+// Statyczne przeliczniki walut
 const CURRENCY_RATES = {
   USD: 1,
   EUR: 0.91,
   PLN: 3.94,
 };
 
-// Crypto metadata
+// Metadane kryptowalut
 const CRYPTO_METADATA = {
   'BTCUSDT': { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
   'ETHUSDT': { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
@@ -35,138 +35,73 @@ const CRYPTO_METADATA = {
   'LINKUSDT': { id: 'chainlink', name: 'Chainlink', symbol: 'LINK' },
 };
 
-// Function to get crypto prices from Binance API
+// Pobiera aktualne dane z Binance (cena + zmiana 24h)
 export const getCryptoData = async (currency = 'USD') => {
   try {
-    // For real implementation, use Binance API:
-    // const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
-    
-    // For demonstration purposes (to avoid API rate limits), we'll simulate the data:
-    const simulatedData = simulateCryptoData();
-    
-    // Convert prices to selected currency
+    const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
+    const binanceData = response.data;
+
+    const filteredData = binanceData.filter((item: any) => CRYPTO_SYMBOLS.includes(item.symbol));
+
     const rate = CURRENCY_RATES[currency as keyof typeof CURRENCY_RATES] || 1;
-    
-    return simulatedData.map(crypto => ({
-      ...crypto,
-      price: crypto.price * rate,
-    }));
+
+    return filteredData.map((item: { symbol: keyof typeof CRYPTO_METADATA; lastPrice: string; priceChangePercent: string; }) => {
+      const metadata = CRYPTO_METADATA[item.symbol];
+      return {
+        id: metadata.id,
+        symbol: metadata.symbol,
+        name: metadata.name,
+        price: parseFloat(item.lastPrice) * rate,
+        priceChangePercent: parseFloat(item.priceChangePercent),
+      };
+    });
   } catch (error) {
-    console.error('Error fetching crypto data:', error);
+    console.error('Error fetching real crypto data from Binance API:', error);
     return [];
   }
 };
 
-// Function to get historical data for a specific crypto
+// Pobiera historyczne dane świecowe z Binance
 export const getHistoricalData = async (cryptoId: string, timeframe = '1d', currency = 'USD') => {
   try {
-    // For real implementation, use Binance API:
-    // const response = await axios.get(`https://api.binance.com/api/v3/klines`, {
-    //   params: {
-    //     symbol: `${cryptoId.toUpperCase()}USDT`,
-    //     interval: timeframe === '1d' ? '1h' : timeframe === '1w' ? '4h' : timeframe === '1m' ? '1d' : '1w',
-    //     limit: 500,
-    //   }
-    // });
+    const symbolEntry = Object.entries(CRYPTO_METADATA).find(([_, meta]) => meta.id === cryptoId);
+    if (!symbolEntry) throw new Error(`Symbol not found for cryptoId: ${cryptoId}`);
     
-    // For demonstration purposes, we'll simulate the data:
-    const simulatedData = simulateHistoricalData(cryptoId, timeframe);
-    
-    // Convert prices to selected currency
+    const [symbol] = symbolEntry;
+
+    const intervalMap: Record<string, string> = {
+      '1d': '1h',
+      '1w': '4h',
+      '1m': '1d',
+      '1y': '1w',
+    };
+    const interval = intervalMap[timeframe] || '1h';
+
+    const limitMap: Record<string, number> = {
+      '1d': 24,
+      '1w': 42,
+      '1m': 30,
+      '1y': 52,
+    };
+    const limit = limitMap[timeframe] || 24;
+
+    const response = await axios.get('https://api.binance.com/api/v3/klines', {
+      params: {
+        symbol,
+        interval,
+        limit,
+      },
+    });
+
+    const rawData = response.data;
     const rate = CURRENCY_RATES[currency as keyof typeof CURRENCY_RATES] || 1;
-    
-    return simulatedData.map(dataPoint => ({
-      ...dataPoint,
-      price: dataPoint.price * rate,
+
+    return rawData.map((item: any[]) => ({
+      timestamp: item[0], // open time
+      price: parseFloat(item[4]) * rate, // close price
     }));
   } catch (error) {
-    console.error('Error fetching historical data:', error);
+    console.error('Error fetching historical data from Binance API:', error);
     return [];
   }
 };
-
-// Simulate crypto data for demonstration
-function simulateCryptoData() {
-  return CRYPTO_SYMBOLS.map(symbol => {
-    const metadata = CRYPTO_METADATA[symbol as keyof typeof CRYPTO_METADATA];
-    const basePrice = getBasePrice(symbol);
-    const priceChange = (Math.random() * 10) - 5; // Random change between -5% and +5%
-    const priceChangePercent = priceChange;
-    
-    return {
-      id: metadata.id,
-      symbol: metadata.symbol,
-      name: metadata.name,
-      price: basePrice * (1 + (priceChange / 100)),
-      priceChangePercent,
-    };
-  });
-}
-
-// Get base price for each crypto
-function getBasePrice(symbol: string) {
-  switch (symbol) {
-    case 'BTCUSDT': return 65000 + (Math.random() * 2000 - 1000);
-    case 'ETHUSDT': return 3500 + (Math.random() * 200 - 100);
-    case 'BNBUSDT': return 580 + (Math.random() * 40 - 20);
-    case 'XRPUSDT': return 0.6 + (Math.random() * 0.1 - 0.05);
-    case 'ADAUSDT': return 0.45 + (Math.random() * 0.05 - 0.025);
-    case 'DOGEUSDT': return 0.12 + (Math.random() * 0.02 - 0.01);
-    case 'SOLUSDT': return 150 + (Math.random() * 20 - 10);
-    case 'DOTUSDT': return 6.5 + (Math.random() * 1 - 0.5);
-    case 'MATICUSDT': return 0.7 + (Math.random() * 0.1 - 0.05);
-    case 'LINKUSDT': return 15 + (Math.random() * 2 - 1);
-    default: return 100;
-  }
-}
-
-// Simulate historical data for demonstration
-function simulateHistoricalData(cryptoId: string, timeframe: string) {
-  const now = new Date();
-  const data = [];
-  const symbol = Object.entries(CRYPTO_METADATA).find(([_, meta]) => meta.id === cryptoId)?.[0];
-  const basePrice = getBasePrice(symbol || 'BTCUSDT');
-  
-  let periods = 24; // 24 hours for 1d
-  let intervalMs = 60 * 60 * 1000; // 1 hour in ms
-  
-  if (timeframe === '1w') {
-    periods = 7 * 24; // 7 days
-    intervalMs = 60 * 60 * 1000; // 1 hour in ms
-  } else if (timeframe === '1m') {
-    periods = 30; // 30 days
-    intervalMs = 24 * 60 * 60 * 1000; // 1 day in ms
-  } else if (timeframe === '1y') {
-    periods = 52; // 52 weeks
-    intervalMs = 7 * 24 * 60 * 60 * 1000; // 1 week in ms
-  }
-  
-  // Generate random price movement that trends in one direction
-  const trend = Math.random() > 0.5 ? 1 : -1; // Random trend direction
-  const volatility = basePrice * 0.02; // 2% of base price
-  let lastPrice = basePrice;
-  
-  for (let i = periods; i >= 0; i--) {
-    const timestamp = now.getTime() - (i * intervalMs);
-    // Each price has a tendency to follow the trend but with randomness
-    const randomChange = (Math.random() - 0.5) * volatility;
-    const trendChange = trend * (Math.random() * volatility * 0.5);
-    lastPrice = lastPrice + randomChange + trendChange;
-    
-    // Ensure price doesn't go below certain threshold
-    if (lastPrice < basePrice * 0.7) {
-      lastPrice = basePrice * 0.7 + Math.random() * basePrice * 0.05;
-    }
-    
-    if (lastPrice > basePrice * 1.3) {
-      lastPrice = basePrice * 1.3 - Math.random() * basePrice * 0.05;
-    }
-    
-    data.push({
-      timestamp,
-      price: lastPrice,
-    });
-  }
-  
-  return data;
-}

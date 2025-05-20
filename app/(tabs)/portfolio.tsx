@@ -79,7 +79,7 @@ export default function PortfolioScreen() {
 
   const handleSell = (item: any) => {
     router.push({
-      pathname: 'modals/sell',
+      pathname: '/modals/sell',
       params: {
         cryptoId: item.id,
         cryptoName: item.name,
@@ -136,7 +136,7 @@ export default function PortfolioScreen() {
       {view === 'holdings' ? (
         <FlatList
           data={portfolioItems}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item?.id ?? ''}
           renderItem={({ item }) => (
             <PortfolioItem
               item={item}

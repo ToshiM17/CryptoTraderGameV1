@@ -21,7 +21,7 @@ export function CryptoCard({ crypto, currency, icon }: CryptoCardProps) {
   
   const handlePress = () => {
     router.push({
-      pathname: 'modals/buy',
+      pathname: '/modals/buy',
       params: {
         cryptoId: crypto.id,
         cryptoName: crypto.name,

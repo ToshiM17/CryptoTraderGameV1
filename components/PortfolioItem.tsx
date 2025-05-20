@@ -11,13 +11,23 @@ type PortfolioItemProps = {
   onPress: () => void;
 };
 
+const CURRENCY_RATES: { [key: string]: number } = {
+  USD: 1,
+  EUR: 0.91,
+  PLN: 3.94,
+};
+
 export function PortfolioItem({ item, currency, onPress }: PortfolioItemProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  
+
   const isProfit = item.profitLoss >= 0;
   const changeColor = isProfit ? Colors.success : Colors.error;
   const ChangeIcon = isProfit ? TrendingUp : TrendingDown;
+
+  // Przelicz zysk/stratę (liczoną w USD) na wybraną walutę do wyświetlenia
+  const profitLossInSelectedCurrency =
+    item.profitLoss / CURRENCY_RATES['USD'] * (CURRENCY_RATES[currency] || 1);
 
   return (
     <TouchableOpacity
@@ -38,12 +48,12 @@ export function PortfolioItem({ item, currency, onPress }: PortfolioItemProps) {
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.rightContent}>
         <Text style={[styles.profitLoss, { color: changeColor }]}>
-          {isProfit ? '+' : ''}{formatCurrency(item.profitLoss, currency)}
+          {isProfit ? '+' : ''}{formatCurrency(profitLossInSelectedCurrency, currency)}
         </Text>
-        
+
         <View style={styles.percentRow}>
           <ChangeIcon size={12} color={changeColor} />
           <Text style={[styles.percentChange, { color: changeColor }]}>

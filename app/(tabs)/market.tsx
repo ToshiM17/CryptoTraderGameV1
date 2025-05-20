@@ -91,7 +91,7 @@ export default function MarketScreen() {
 
   const handleBuy = (crypto: any) => {
     router.push({
-      pathname: 'modals/buy',
+      pathname: '/modals/buy',
       params: { cryptoId: crypto.id, cryptoName: crypto.name, cryptoPrice: crypto.price }
     });
   };

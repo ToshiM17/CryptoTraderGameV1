@@ -18,18 +18,24 @@ import {
 } from 'lucide-react-native';
 
 export default function SettingsScreen() {
-  const { virtualMoney, currency, setCurrency, resetPortfolio } = useAppContext();
+  const { virtualMoney, currency, setCurrency, setVirtualMoney, resetPortfolio } = useAppContext();
   const { language, changeLanguage } = useI18nContext();
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  
+
+  const exchangeRates: Record<string, number> = {
+    USD: 1,
+    EUR: 0.91,
+    PLN: 3.94,
+  };
+
   const currencies = [
     { code: 'USD', label: 'US Dollar ($)', icon: <DollarSign size={20} color={colors.text} /> },
     { code: 'EUR', label: 'Euro (€)', icon: <Euro size={20} color={colors.text} /> },
     { code: 'PLN', label: 'Polish Złoty (zł)', icon: <DollarSign size={20} color={colors.text} /> },
   ];
-  
+
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'pl', label: 'Polski' },
@@ -42,8 +48,8 @@ export default function SettingsScreen() {
       t('reset_warning'),
       [
         { text: t('cancel'), style: 'cancel' },
-        { 
-          text: t('reset'), 
+        {
+          text: t('reset'),
           style: 'destructive',
           onPress: resetPortfolio
         }
@@ -51,12 +57,25 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleCurrencyChange = (newCurrency: string) => {
+    if (newCurrency === currency) return;
+
+    const oldRate = exchangeRates[currency];
+    const newRate = exchangeRates[newCurrency];
+
+    const usdValue = virtualMoney / oldRate;
+    const newValue = usdValue * newRate;
+
+    setVirtualMoney(newValue);
+    setCurrency(newCurrency as any);
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>{t('settings')}</Text>
       </View>
-      
+
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {t('currency')}
@@ -69,7 +88,7 @@ export default function SettingsScreen() {
                 styles.option,
                 currency === item.code && { backgroundColor: colors.tintLight }
               ]}
-              onPress={() => setCurrency(item.code as any)}
+              onPress={() => handleCurrencyChange(item.code)}
             >
               <View style={styles.optionLeft}>
                 {item.icon}
@@ -84,7 +103,7 @@ export default function SettingsScreen() {
           ))}
         </View>
       </View>
-      
+
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {t('language')}
@@ -112,7 +131,7 @@ export default function SettingsScreen() {
           ))}
         </View>
       </View>
-      
+
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {t('actions')}
@@ -132,7 +151,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <View style={styles.footer}>
         <Text style={[styles.footerText, { color: colors.textSecondary }]}>
           {t('trading_simulator')}
