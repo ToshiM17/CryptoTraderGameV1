@@ -22,7 +22,7 @@ const CURRENCY_RATES = {
 };
 
 // Metadane kryptowalut
-const CRYPTO_METADATA = {
+export const CRYPTO_METADATA = {
   'BTCUSDT': { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
   'ETHUSDT': { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
   'BNBUSDT': { id: 'binancecoin', name: 'Binance Coin', symbol: 'BNB' },

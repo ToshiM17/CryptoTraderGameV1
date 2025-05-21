@@ -10,6 +10,9 @@ import { X } from 'lucide-react-native';
 import { formatCurrency, formatCrypto } from '@/utils/formatters';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { PriceChart } from '@/components/PriceChart';
+import { CRYPTO_METADATA } from '@/utils/api';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function SellModal() {
   const params = useLocalSearchParams<{
@@ -18,6 +21,15 @@ export default function SellModal() {
     cryptoPrice: string;
     cryptoAmount: string;
   }>();
+
+  const getBinanceSymbolFromIdOrName = (id: string, name: string): string => {
+    const entry = Object.entries(CRYPTO_METADATA).find(
+      ([, meta]) =>
+        meta.id.toLowerCase() === id.toLowerCase() ||
+        meta.name.toLowerCase() === name.toLowerCase()
+    );
+    return entry ? entry[0] : 'BTCUSDT'; // domyślnie BTCUSDT jeśli nie znaleziono
+  };
   
   const { currency, addTransaction } = useAppContext();
   const { t } = useTranslation();
@@ -118,7 +130,7 @@ export default function SellModal() {
           <X size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
-      
+      <ScrollView>
       <View style={styles.content}>
         <View style={styles.info}>
           <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
@@ -210,7 +222,10 @@ export default function SellModal() {
           </View>
         </View>
       </View>
-      
+      <View>
+        <PriceChart symbol={getBinanceSymbolFromIdOrName(cryptoId, cryptoName)} />
+      </View>
+      </ScrollView>
       <TouchableOpacity
         style={[
           styles.sellButton,

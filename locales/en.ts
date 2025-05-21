@@ -14,6 +14,8 @@ export const en = {
   name: 'Name',
   price: 'Price',
   '24h': '24h',
+  '1w': '1w',
+  '1m': '1m',
   
   // Portfolio
   holdings: 'Holdings',

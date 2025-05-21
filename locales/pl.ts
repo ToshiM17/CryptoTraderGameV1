@@ -14,6 +14,8 @@ export const pl = {
   name: 'Nazwa',
   price: 'Cena',
   '24h': '24h',
+  '1w': '1tyg',
+  '1m': '1miesiąc',
   
   // Portfolio
   holdings: 'Posiadane',

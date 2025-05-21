@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useAppContext } from '@/contexts/AppContext';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -10,6 +10,8 @@ import { X } from 'lucide-react-native';
 import { formatCurrency, formatCrypto } from '@/utils/formatters';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { PriceChart } from '@/components/PriceChart';
+import { CRYPTO_METADATA } from '@/utils/api';
 
 export default function BuyModal() {
   const params = useLocalSearchParams<{
@@ -17,7 +19,6 @@ export default function BuyModal() {
     cryptoName: string;
     cryptoPrice: string;
   }>();
-  
   const { virtualMoney, currency, addTransaction } = useAppContext();
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
@@ -29,6 +30,15 @@ export default function BuyModal() {
   const cryptoId = params.cryptoId;
   const cryptoName = params.cryptoName;
   const cryptoPrice = parseFloat(params.cryptoPrice || '0');
+
+  const getBinanceSymbolFromIdOrName = (id: string, name: string): string => {
+  const entry = Object.entries(CRYPTO_METADATA).find(
+    ([, meta]) =>
+      meta.id.toLowerCase() === id.toLowerCase() ||
+      meta.name.toLowerCase() === name.toLowerCase()
+  );
+  return entry ? entry[0] : 'BTCUSDT'; // domyślnie BTCUSDT jeśli nie znaleziono
+};
   
   const handleAmountChange = (text: string) => {
     // Accept only numbers and decimals
@@ -101,6 +111,7 @@ export default function BuyModal() {
           <X size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
+      <ScrollView>
       
       <View style={styles.content}>
         <View style={styles.info}>
@@ -163,7 +174,6 @@ export default function BuyModal() {
             </Text>
           </View>
         </View>
-        
         <View style={styles.summary}>
           <Text style={[styles.summaryText, { color: colors.text }]}>
             {t('buy_summary', {
@@ -174,7 +184,11 @@ export default function BuyModal() {
           </Text>
         </View>
       </View>
+      <View>
+        <PriceChart symbol={getBinanceSymbolFromIdOrName(cryptoId, cryptoName)} />
+      </View>
       
+      </ScrollView>
       <TouchableOpacity
         style={[
           styles.buyButton,
