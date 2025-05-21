@@ -52,6 +52,9 @@ export const pl = {
   tax: 'Podatek',
   
   // Settings
+  color_scheme: 'Motyw',
+  light_mode: 'Jasny',
+  dark_mode: 'Ciemny',
   currency: 'Waluta',
   language: 'Język',
   actions: 'Akcje',

@@ -52,6 +52,9 @@ export const es = {
   tax: 'Impuesto',
   
   // Settings
+  color_scheme: 'Esquema de color',
+  light_mode: 'Modo claro',
+  dark_mode: 'Modo oscuro',
   currency: 'Moneda',
   language: 'Idioma',
   actions: 'Acciones',

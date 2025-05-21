@@ -52,6 +52,9 @@ export const en = {
   tax: 'Tax',
   
   // Settings
+  color_scheme: 'Color Scheme',
+  light_mode: 'Light Mode',
+  dark_mode: 'Dark Mode',
   currency: 'Currency',
   language: 'Language',
   actions: 'Actions',
