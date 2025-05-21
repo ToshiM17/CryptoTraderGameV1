@@ -157,7 +157,7 @@ export default function SettingsScreen() {
           {t('trading_simulator')}
         </Text>
         <Text style={[styles.version, { color: colors.textSecondary }]}>
-          Version 1.0.0
+          Version 1.0.1
         </Text>
       </View>
     </SafeAreaView>
