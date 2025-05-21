@@ -64,6 +64,7 @@ export function PriceChart({ symbol }: PriceChartProps) {
   const priceChangePercent = startPrice ? (priceChange / startPrice) * 100 : 0;
   const isPositive = priceChange >= 0;
   const chartColor = isPositive ? Colors.success : Colors.error;
+  const minPrice = data.length > 0 ? Math.min(...data.map(d => d.price)) : 0;
 
   const formatXAxis = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -119,6 +120,7 @@ export function PriceChart({ symbol }: PriceChartProps) {
             width={screenWidth}
             height={200}
             padding={{ top: 10, bottom: 30, left: 50, right: 20 }}
+            domain={{ y: [minPrice, data.length > 0 ? Math.max(...data.map(d => d.price)) : minPrice] }}
           >
             <VictoryArea
               data={data}
